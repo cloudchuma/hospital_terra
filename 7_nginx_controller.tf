@@ -1,22 +1,23 @@
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = "kube-system"
 
-
-provider "helm" {
-  kubernetes {
-    host                   = azurerm_kubernetes_cluster.this.kube_config.0.host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.cluster_ca_certificate)
+  set {
+    name  = "controller.service.type"
+    value = "LoadBalancer"
   }
-}
 
-resource "helm_release" "external_nginx" {
-  name = "external"
+  set {
+    name  = "controller.service.externalTrafficPolicy"
+    value = "Cluster"
+  }
 
-  repository       = "https://kubernetes.github.io/ingress-nginx"
-  chart            = "ingress-nginx"
-  namespace        = "ingress"
-  create_namespace = true
-  version          = "4.8.0"
+  set {
+    name  = "controller.admissionWebhooks.enabled"
+    value = "false"
+  }
 
-  values = [file("${path.module}/values/ingress.yaml")]
+  depends_on = [aws_eks_cluster.this]
 }

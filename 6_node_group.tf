@@ -1,23 +1,22 @@
-resource "azurerm_kubernetes_cluster_node_pool" "this" {
-  name                  = "internal"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.this.id
-  vm_size               = "Standard_DS2_v2"
-  vnet_subnet_id        = azurerm_subnet.subnet1.id
-  node_count            = 2
-  auto_scaling_enabled = true
-  min_count           = 1
-  max_count           = 10
+resource "aws_eks_node_group" "this" {
+  cluster_name    = aws_eks_cluster.this.name
+  node_group_name = "internal"
+  node_role_arn   = aws_iam_role.eks_node.arn
+  subnet_ids      = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]  # Replace with your subnets
 
-#   node_labels = {
-#     role                                    = "internal"
-#     "kubernetes.azure.com/scalesetpriority" = "internal"
-#   }
+  scaling_config {
+    desired_size = 2
+    min_size     = 1
+    max_size     = 10
+  }
+
+  instance_types = ["t3.medium"]  # Equivalent of "Standard_DS2_v2"
 
   tags = {
     Environment = "dev"
   }
 
   lifecycle {
-    ignore_changes = [node_count]
+    ignore_changes = [scaling_config[0].desired_size]
   }
 }

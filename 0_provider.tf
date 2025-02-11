@@ -17,6 +17,6 @@ variable "aws_secret_key" {}
 
 
 
-# terraform-azure-pipeline  is the name of the ( App Registration )
+# terraform-AWS-pipeline  is the name of the ( App Registration )
 # permission for the App Registration 
 # Owner under the subscription

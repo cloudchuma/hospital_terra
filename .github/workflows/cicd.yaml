@@ -1,0 +1,51 @@
+name: 'Terraform infrastructure Deployment to Azure Cloud'
+
+
+# trigger
+#=========
+on:
+  push:
+    branches: [ "main" ]
+
+
+jobs:
+  terraform:
+    name: 'TerraformAWSCloud'
+    runs-on: ubuntu-latest
+
+    environment: dev
+
+   
+    defaults:
+      run:
+        shell: bash
+
+
+
+    steps: 
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+  
+    - name: Terraform Init
+      run: terraform init
+
+
+ 
+    - name: Terraform Plan 
+      run: terraform plan -var "aws_acsess_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" -var "aws_secrete_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" 
+
+
+
+    # - name: Terraform Apply
+    #   run:  terraform apply -var "aws_acsess_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" -var "aws_secrete_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" -auto-approve -input=false
+
+
+    - name: Terraform Destroy
+      run:  terraform destroy -var "aws_acsess_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" -var "aws_secrete_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" -auto-approve -input=false
